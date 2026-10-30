@@ -1,0 +1,31 @@
+# 比对验收与双平台实现 · 高发坑清单
+
+两轮实战（网页 demo 五轮比对 + PySide6 桌面应用三轮比对 + nitpick 19 修）沉淀。比对前过一遍，能省掉大部分返修轮次。
+
+## Web / 无头截图
+
+- **innerHTML 整体替换会销毁内部监听器** → 用事件委托，或替换后重挂。
+- **骨架屏整体替换 innerHTML 会吞掉脚本载入期的属性/元素注入**——注入必须挂在骨架还原回调之后，不能在脚本载入期直接插。
+- `setPointerCapture(合成 pointerId)` 抛 InvalidPointerId → try-catch 包住。
+- IAB/后台标签 rAF 全停 → 判"功能坏了"之前先查 `document.visibilityState`。
+- localStorage 读入的数据做白名单校验，别直接进 DOM。
+- 隐藏页用 `visibility:hidden` 时要同步移出 Tab 焦点序。
+- 无头截图：JS 定时器驱动的界面加 `--virtual-time-budget=4000`（默认截图时机在 load，骨架屏还没被替换）；dev 服务器必须发 no-cache 头，否则 Chromium 启发式缓存吃掉静态资源改动。
+- 官方 repo 里的 preview 图常是**带设备框的营销合成图**——只可裁出屏幕区域使用，不当裸样本；视觉模型给的裁剪坐标两次可能矛盾，重要样本裁完要验一次。
+
+## PySide6 / Qt 桌面
+
+- **QSS font-size 的 px 是物理像素**：150% DPI 下写 11px ≈ 7 逻辑像素的蚂蚁字，且不进 sizeHint。QSS 一律不写字号，用 `setFont` + `setPixelSize`（逻辑像素）。
+- **QSS border-radius 在 Win11+150%DPI 实测失效** → 圆角和卡片底一律 QPainter 自绘；自绘控件不要调 `super().paintEvent`。
+- **`QColor("rgba(r,g,b,a)")` 静默变黑**：QColor 构造器不认 rgba() 字符串，不报错、直接给黑色。写一个 rgba() 字符串解析器统一入口。
+- **页面总高超出窗口时布局会压缩控件**（QLabel 被压到 9px 高、11px 字溢出成"叠印"假象）→ 页面套 QScrollArea + 尺寸瘦身；用 QGridLayout 探针读实际 geometry 验证，别信肉眼。
+- **深色主题半生效**：所有自绘容器要收进 retheme 名单（含后加的），递归整棵子树；QPalette 必须整套随主题设置，漏了 appbar/菜单仍是系统色。
+- **跨线程共享队列**：后台线程写 deque、UI 线程迭代时抛 RuntimeError → 锁 + `snapshot()`（拷贝后再迭代）。
+- 渲染大日志：全量 setHtml 会冻结 UI → 批量拼接 + 只渲染尾部 N 条（如 500），滚屏加载更早的。
+- 主题切换时分段器/开关等复合控件的状态要双向同步（改状态要刷 UI、点 UI 要改状态），否则换肤后显示错档。
+
+## 流程类
+
+- 打分验收（"像度 9/10"）无效——只有逐区块差异清单清零能验收。
+- 视觉模型单轮描述不可信：让它"逐区块对照 + 输出带证据的差异清单"，一条条返修，再复比。
+- 桌面 exe 与参考软件同屏对比时，先 MoveWindow 定位再 PrintWindow，坐标 = 图内坐标 + 窗口原点。

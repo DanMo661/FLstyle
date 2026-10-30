@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<!-- FLstyle v1 工具类风格包 · 仪表盘骨架代码
+     用法：整页抄走，逐块替换内容；结构与类名对应 SKILL.md B4 标尺。
+     抄完必须对照 shots/01-main.png 做比对验收（SKILL.md A4）。 -->
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>FLstyle skeleton</title>
+<style>
+/* ===== tokens（B3，浅/深两套）===== */
+:root {
+  --page:#F1F1F2; --card:#ffffff; --track:#E8E8E9; --well:#E1E1E2; --badge:#DEDEDF;
+  --fg:#1A1C1E; --fg2:#757575; --accent:#1B6FD8; --line:rgba(26,28,30,.14);
+  --r-card:16px; --gap:18px;
+}
+[data-theme=dark] {
+  --page:#171717; --card:#242424; --track:#2F2F2F; --well:#1C1C1C;
+  --badge:#3A3A3A; --fg:#F2F2F2; --fg2:#9E9E9E; --line:rgba(242,242,242,.2);
+}
+body{margin:0;font:14px/1.5 system-ui;background:var(--page);color:var(--fg)}
+.app{display:flex;height:100vh}
+
+/* ===== 侧栏（B4：宽 220，行高 36，选中=药丸+左缘 3px 蓝竖条）===== */
+.rail{width:220px;padding:16px 0 16px 3px;display:flex;flex-direction:column;gap:8px}
+.rail a{display:flex;align-items:center;gap:13px;height:36px;padding:0 23px;
+        border-radius:18px;color:var(--fg2);text-decoration:none}
+.rail a.on{background:var(--badge);color:var(--fg);font-weight:600;
+        box-shadow:inset 3px 0 0 var(--accent)}
+
+/* ===== 内容区与页头（B4：边距 20，页头高 75）===== */
+.main{flex:1;padding:0 20px;overflow:auto}
+.pagehead{height:75px;display:flex;align-items:center;justify-content:space-between}
+.pagehead h1{font-size:24px;margin:0}
+.round-btn{width:37px;height:37px;border-radius:50%;border:none;background:var(--card);
+        color:var(--fg);font-size:16px;cursor:pointer}
+
+/* ===== 网格与卡片（B4：列隙 18，行距 19，圆角 16，内边距 24）===== */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:19px 18px}
+.card{background:var(--card);border-radius:var(--r-card);padding:24px}
+.card.span{grid-column:1/-1}
+
+/* hero：高 204，左信息列 + 右花形大钮 ⌀101 */
+.hero{min-height:204px;display:flex;justify-content:space-between;align-items:center}
+.hero .num{font-size:31px;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+
+/* KPI 卡：标题行 + 42px 大数字 + 图表吃满余高 */
+.kpi .num{font-size:42px;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.kpi .row1{display:flex;justify-content:space-between;color:var(--fg2);font-size:14px}
+
+/* 分段器：高 58，轨色底，选中段实心蓝（B7：无滑动滑块，原位淡入淡出） */
+.seg{display:flex;background:var(--track);border-radius:29px;padding:5px;height:58px}
+.seg button{flex:1;border:none;background:transparent;color:var(--fg2);
+        border-radius:24px;font-size:16px;cursor:pointer;transition:background .2s,color .2s}
+.seg button.on{background:var(--accent);color:#fff}
+
+/* 开关行：高 61 = 40 图标井（井色+强调色描边图形）+ 主/副文 + 开关 52×32 */
+.switchrow{display:flex;align-items:center;gap:16px;min-height:61px}
+.switchrow .ic{width:40px;height:40px;border-radius:10px;background:var(--well);color:var(--accent);
+        display:grid;place-items:center;font-size:18px}
+.switchrow .tt{flex:1}
+.switchrow .tt b{font-size:16px;display:block}
+.switchrow .tt small{font-size:14px;color:var(--fg2)}
+.sw{width:52px;height:32px;border-radius:16px;background:var(--track);position:relative;cursor:pointer;
+        transition:background .15s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;
+        background:var(--fg2);transition:transform .15s,background .15s}
+.sw.on{background:var(--accent)}
+.sw.on::after{transform:translateX(20px);background:#fff}
+
+/* 分组列表（B4：行高 56，1px 低透明分隔线，分组标题在卡外） */
+.listcard{padding:0 24px}
+.listcard .row{display:flex;align-items:center;gap:26px;height:56px}
+.listcard .row+.row{border-top:1px solid var(--line)}
+.group-title{font-size:13px;color:var(--fg2);margin:24px 0 8px}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="rail">
+    <a class="on">◧ 仪表盘</a><a>◷ 配置</a><a>⋈ 实时连接</a><a>☉ 工具</a>
+  </nav>
+  <main class="main">
+    <div class="pagehead"><h1>仪表盘</h1><button class="round-btn">✓</button></div>
+    <div class="grid">
+
+      <!-- hero 通栏：左信息列（徽章药丸→大数字→次要行）+ 右花形大钮 -->
+      <section class="card span hero">
+        <div>
+          <p><span style="background:var(--badge);border-radius:9px;padding:2px 10px;font-size:16px">状态徽章</span></p>
+          <p class="num">31px 大数字</p>
+          <p style="color:var(--fg2);font-size:14px">14px 次要行</p>
+        </div>
+        <canvas id="flower" width="101" height="101"></canvas>
+      </section>
+
+      <!-- 双列 KPI 卡 -->
+      <section class="card kpi">
+        <div class="row1"><span>◧ 卡头 16px</span><span>峰值 xx</span></div>
+        <p class="num">42px</p>
+        <div style="min-height:60px">图表区（吃满余高）</div>
+      </section>
+      <section class="card kpi">
+        <div class="row1"><span>◷ 卡头 16px</span><span>峰值 xx</span></div>
+        <p class="num">42px</p>
+        <div style="min-height:60px">图表区</div>
+      </section>
+
+      <!-- 通栏分段器 -->
+      <section class="card span seg">
+        <button class="on">规则</button><button>全局</button><button>直连</button>
+      </section>
+
+      <!-- 开关行 -->
+      <section class="card span switchrow">
+        <span class="ic">⚡</span>
+        <span class="tt"><b>16px 主文字</b><small>14px 副文字</small></span>
+        <span class="sw on" onclick="this.classList.toggle('on')"></span>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script>
+/* 花形 scalloped seal（B6）：n 瓣外鼓，弦长 2R·sin(π/n) ≤ 2r 即有效。
+   大钮 10~12 瓣；<30px 小徽章用 5~6 瓣或退回圆形。 */
+function flowerPath(cx, cy, R, r, n) {
+  let p = "";
+  for (let i = 0; i < n; i++) {
+    const a0 = (i / n) * 2 * Math.PI - Math.PI / 2, a1 = ((i + 1) / n) * 2 * Math.PI - Math.PI / 2;
+    const x0 = cx + R * Math.cos(a0), y0 = cy + R * Math.sin(a0);
+    const x1 = cx + R * Math.cos(a1), y1 = cy + R * Math.sin(a1);
+    p += (i ? "L" : "M") + x0.toFixed(2) + "," + y0.toFixed(2)
+       + "A" + r + "," + r + " 0 0 1 " + x1.toFixed(2) + "," + y1.toFixed(2);
+  }
+  return p + "Z";
+}
+const c = document.getElementById("flower").getContext("2d");
+c.translate(50.5, 50.5);
+c.fillStyle = "#1B6FD8";
+c.fill(new Path2D(flowerPath(0, 0, 48, 2 * 48 * Math.sin(Math.PI / 11) * 0.62, 11)));
+c.fillStyle = "#fff"; c.font = "13px system-ui"; c.textAlign = "center";
+c.fillText("▶", 0, 5);
+</script>
+</body>
+</html>
