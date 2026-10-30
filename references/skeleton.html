@@ -1,129 +1,234 @@
 <!DOCTYPE html>
 <!-- FLstyle v1 工具类风格包 · 仪表盘骨架代码
-     用法：整页抄走，逐块替换内容；结构与类名对应 SKILL.md B4 标尺。
+     用法：整页抄走，逐块替换内容；结构与类名对应 SKILL.md B4 标尺，
+     元素组合（图标+标题、数字+单位基线对齐、尾槽、缩进分隔线）对应 B9/pairing.md 配方。
+     无头截图比对时用 --force-device-scale-factor=1.5 --window-size=933,977 对齐样本 DPI。
      抄完必须对照 shots/01-main.png 做比对验收（SKILL.md A4）。 -->
 <html lang="zh">
 <head>
 <meta charset="utf-8">
 <title>FLstyle skeleton</title>
 <style>
-/* ===== tokens（B3，浅/深两套）===== */
+/* ===== tokens（B3，像素级实测；深色为 slate 系）===== */
 :root {
-  --page:#F1F1F2; --card:#ffffff; --track:#E8E8E9; --well:#E1E1E2; --badge:#DEDEDF;
-  --fg:#1A1C1E; --fg2:#757575; --accent:#1B6FD8; --line:rgba(26,28,30,.14);
-  --r-card:16px; --gap:18px;
+  --page:#E6E4E7; --sidebar:#E4E2E4; --card:#FCF8F9;
+  --surface2:#EFEDEF;              /* 次级表面：徽章=嵌套井=未选分段=装饰纹 */
+  --well:#E4E2E4;                  /* 交互井：OFF 开关轨/播放圆（浅色=侧栏色） */
+  --pill:#DEDEDE;                  /* 侧栏选中药丸 */
+  --fg:#181C23; --fg2:#414755;     /* 次文字=图标 同 token */
+  --accent:#007AFF; --line:rgba(24,28,35,.14);
+  --ok-bg:#94F990; --ok-fg:#005313;
+  --r-card:18px; --gap-x:16px; --gap-y:17px;
 }
 [data-theme=dark] {
-  --page:#171717; --card:#242424; --track:#2F2F2F; --well:#1C1C1C;
-  --badge:#3A3A3A; --fg:#F2F2F2; --fg2:#9E9E9E; --line:rgba(242,242,242,.2);
+  --page:#131315; --sidebar:#1B1B1E; --card:#252628;
+  --surface2:#323235; --well:#404042; --pill:#353538;
+  --fg:#F5F6FF; --fg2:#C1C6D7; --accent:#2F83FF; --line:rgba(245,246,255,.16);
+  --ok-bg:#005313; --ok-fg:#94F990;  /* 成功绿对：深色前后景精确互换 */
 }
-body{margin:0;font:14px/1.5 system-ui;background:var(--page);color:var(--fg)}
-.app{display:flex;height:100vh}
+body{margin:0;font:15px/1.4 system-ui;background:var(--page);color:var(--fg)}
+.app{display:flex;flex-direction:column;height:100vh}
 
-/* ===== 侧栏（B4：宽 220，行高 36，选中=药丸+左缘 3px 蓝竖条）===== */
-.rail{width:220px;padding:16px 0 16px 3px;display:flex;flex-direction:column;gap:8px}
-.rail a{display:flex;align-items:center;gap:13px;height:36px;padding:0 23px;
+/* ===== 自绘标题栏 31，无文字仅窗控，与内容同底色无分隔线 ===== */
+.titlebar{height:31px;flex:none;display:flex;align-items:center;justify-content:flex-end;
+        gap:26px;padding:0 20px;color:var(--fg2);font-size:12px;background:var(--sidebar)}
+.shell{display:flex;flex:1;min-height:0}
+
+/* ===== 侧栏（浅色比画布暗、深色比画布亮；选中=灰药丸+左缘4px蓝竖条）===== */
+.rail{width:220px;flex:none;background:var(--sidebar);padding:8px 0 16px 4px;
+      display:flex;flex-direction:column;gap:8px}
+.rail .railhead{height:36px;display:flex;align-items:center;padding:0 18px;
+      color:var(--fg2);font-size:16px}
+.rail a{display:flex;align-items:center;gap:13px;height:36px;padding:0 22px;
         border-radius:18px;color:var(--fg2);text-decoration:none}
-.rail a.on{background:var(--badge);color:var(--fg);font-weight:600;
-        box-shadow:inset 3px 0 0 var(--accent)}
+.rail a.on{background:var(--pill);color:var(--fg);font-weight:600;
+        box-shadow:inset 4px 0 0 var(--accent)}
 
-/* ===== 内容区与页头（B4：边距 20，页头高 75）===== */
-.main{flex:1;padding:0 20px;overflow:auto}
-.pagehead{height:75px;display:flex;align-items:center;justify-content:space-between}
-.pagehead h1{font-size:24px;margin:0}
-.round-btn{width:37px;height:37px;border-radius:50%;border:none;background:var(--card);
-        color:var(--fg);font-size:16px;cursor:pointer}
+/* ===== 内容区与页头（B4：右边距=左边距+滚动条槽）===== */
+.main{flex:1;padding:0 39px 0 17px;overflow:auto}
+.pagehead{height:72px;display:flex;align-items:center;justify-content:space-between}
+.pagehead h1{font-size:24px;line-height:30px;font-weight:600;margin:0}
+.round-btn{width:43px;height:43px;border-radius:50%;border:none;background:var(--ok-bg);
+        color:var(--ok-fg);font-size:17px;cursor:pointer}
 
-/* ===== 网格与卡片（B4：列隙 18，行距 19，圆角 16，内边距 24）===== */
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:19px 18px}
-.card{background:var(--card);border-radius:var(--r-card);padding:24px}
+/* ===== 网格与卡片（行卡贴样本高度：分段器卡 65、开关行卡 63）===== */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap-y) var(--gap-x)}
+.card{position:relative;overflow:hidden;background:var(--card);
+      border-radius:var(--r-card);padding:16px 22px}
 .card.span{grid-column:1/-1}
+.card.rowcard{display:flex;align-items:center;padding:9px 22px}
 
-/* hero：高 204，左信息列 + 右花形大钮 ⌀101 */
-.hero{min-height:204px;display:flex;justify-content:space-between;align-items:center}
-.hero .num{font-size:31px;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+/* 卡标题行 = 固定对②：icon 20 + 17 w600（gap 12）+ 右侧 13 灰元信息 */
+.cardhead{display:flex;align-items:center;gap:12px;font-size:17px;font-weight:600}
+.cardhead .meta{margin-left:auto;font-size:13px;font-weight:400;color:var(--fg2)}
 
-/* KPI 卡：标题行 + 42px 大数字 + 图表吃满余高 */
-.kpi .num{font-size:42px;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
-.kpi .row1{display:flex;justify-content:space-between;color:var(--fg2);font-size:14px}
+/* hero：高 204；右缘花形灰 blob（次级表面色，被卡角裁切）+ ⌀117 正圆钮 */
+.hero{min-height:204px;display:flex;justify-content:space-between}
+.hero .num{font-size:40px;line-height:44px;font-weight:700;
+        font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.hero .unit{font-size:13px;color:var(--fg2)}       /* 固定对④：与数字基线对齐 */
+.hero .chip{background:var(--surface2);border-radius:16px;padding:3px 12px;font-size:13px}
+.hero .chip.ok{background:var(--ok-bg);color:var(--ok-fg)}
+.heroinfo{display:flex;gap:55px;margin-top:16px}   /* 固定对⑤ 标签/值 两列 */
+.heroinfo small{display:block;font-size:13px;color:var(--fg2)}
+.heroinfo b{font-size:15px;font-weight:500}
+.play{width:117px;height:117px;border-radius:50%;background:var(--well);color:var(--fg2);
+        display:grid;place-items:center;font-size:30px;align-self:center;position:relative}
+.play span{transform:translateX(4px)}
+#blob{position:absolute;right:-24px;top:-24px;z-index:0}
+.playwrap{display:flex;align-items:center;position:relative;z-index:1}
 
-/* 分段器：高 58，轨色底，选中段实心蓝（B7：无滑动滑块，原位淡入淡出） */
-.seg{display:flex;background:var(--track);border-radius:29px;padding:5px;height:58px}
-.seg button{flex:1;border:none;background:transparent;color:var(--fg2);
-        border-radius:24px;font-size:16px;cursor:pointer;transition:background .2s,color .2s}
-.seg button.on{background:var(--accent);color:#fff}
+/* KPI 卡：数字区顶置，底部留白是节奏不是失误 */
+.kpi{min-height:205px;display:flex;flex-direction:column}
+.kpi .num{font-size:40px;line-height:44px;font-weight:700;
+        font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.kpi .sub{margin-top:10px;font-size:13px;color:var(--fg2)}
 
-/* 开关行：高 61 = 40 图标井（井色+强调色描边图形）+ 主/副文 + 开关 52×32 */
-.switchrow{display:flex;align-items:center;gap:16px;min-height:61px}
-.switchrow .ic{width:40px;height:40px;border-radius:10px;background:var(--well);color:var(--accent);
-        display:grid;place-items:center;font-size:18px}
+/* 分段器：整体连续圆角轨道三等分 + 段间 3px 卡色细缝（像素裁决） */
+.seg{display:flex;align-items:center;gap:27px;min-height:65px}
+.seg .label{display:flex;align-items:center;gap:14px;font-size:17px;font-weight:600}
+.track{flex:1;height:47px;background:var(--surface2);
+       border-radius:24px;padding:0;display:flex;overflow:hidden}
+.track button{flex:1;border:none;cursor:pointer;background:transparent;color:var(--fg);
+       border-radius:24px;font-size:15px;font-weight:500;transition:background .2s,color .2s}
+.track button + button{border-left:3px solid var(--card)}
+.track button.on{background:var(--accent);color:#fff}
+
+/* 开关行 = ⌀35 正圆图标容器（开启态=蓝底白glyph）+ 固定对③ 文字列 + 开关 49×32 */
+.switchrow{display:flex;align-items:center;gap:22px}
+.switchrow .ic{width:35px;height:35px;border-radius:50%;background:var(--accent);color:#fff;
+        display:grid;place-items:center;font-size:16px;flex:none}
+.switchrow .ic.off{background:transparent;color:var(--fg2);font-size:20px}
 .switchrow .tt{flex:1}
-.switchrow .tt b{font-size:16px;display:block}
-.switchrow .tt small{font-size:14px;color:var(--fg2)}
-.sw{width:52px;height:32px;border-radius:16px;background:var(--track);position:relative;cursor:pointer;
-        transition:background .15s}
+.switchrow .tt b{font-size:17px;font-weight:600;display:block}
+.switchrow .tt small{font-size:13px;color:var(--fg2);display:block;margin-top:2px}
+.sw{width:49px;height:32px;border-radius:16px;background:var(--well);position:relative;
+        cursor:pointer;transition:background .15s;flex:none}
 .sw::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;
-        background:var(--fg2);transition:transform .15s,background .15s}
+        background:#717786;transition:transform .15s,background .15s}  /* 浅色：thumb 比轨深 */
+[data-theme=dark] .sw::after{background:#8B90A0}                     /* 深色：thumb 比轨亮 */
 .sw.on{background:var(--accent)}
-.sw.on::after{transform:translateX(20px);background:#fff}
+.sw.on::after{transform:translateX(17px);background:#fff}
 
-/* 分组列表（B4：行高 56，1px 低透明分隔线，分组标题在卡外） */
-.listcard{padding:0 24px}
+/* 列表行：行高56 + 固定尾槽（右缘对齐）；分隔线=缩进线（文字起→尾槽止） */
+.listcard{padding:4px 22px}
 .listcard .row{display:flex;align-items:center;gap:26px;height:56px}
-.listcard .row+.row{border-top:1px solid var(--line)}
+.listcard .row .t{font-size:17px}
+.listcard .row .tail{margin-left:auto;color:var(--fg2);font-size:13px;
+        display:flex;align-items:center;gap:6px}
+.listcard .row+.row{position:relative}
+.listcard .row+.row::before{content:"";position:absolute;left:52px;right:36px;top:0;
+        height:1px;background:var(--line)}
 .group-title{font-size:13px;color:var(--fg2);margin:24px 0 8px}
 </style>
 </head>
 <body>
 <div class="app">
+  <div class="titlebar"><span>⌖</span><span>—</span><span>▢</span><span>✕</span></div>
+  <div class="shell">
   <nav class="rail">
+    <div class="railhead">▤</div>
     <a class="on">◧ 仪表盘</a><a>◷ 配置</a><a>⋈ 实时连接</a><a>☉ 工具</a>
   </nav>
   <main class="main">
     <div class="pagehead"><h1>仪表盘</h1><button class="round-btn">✓</button></div>
     <div class="grid">
 
-      <!-- hero 通栏：左信息列（徽章药丸→大数字→次要行）+ 右花形大钮 -->
+      <!-- hero 通栏：头部行 → 主体(花形徽章+IP大字+药丸行) → 信息行两列；右 blob+正圆钮 -->
       <section class="card span hero">
-        <div>
-          <p><span style="background:var(--badge);border-radius:9px;padding:2px 10px;font-size:16px">状态徽章</span></p>
-          <p class="num">31px 大数字</p>
-          <p style="color:var(--fg2);font-size:14px">14px 次要行</p>
+        <canvas id="blob" width="300" height="300"></canvas>
+        <div style="position:relative;z-index:1">
+          <p style="display:flex;align-items:center;gap:15px;margin:0 0 14px">
+            <span style="font-size:17px;font-weight:600;display:flex;align-items:center;gap:12px">⏱ 状态</span>
+            <span class="chip">未运行</span>
+          </p>
+          <p style="display:flex;align-items:flex-start;gap:15px;margin:0">
+            <canvas id="cnbadge" width="48" height="47"></canvas>
+            <span>
+              <span class="num">0.0.0.0</span><br>
+              <span style="display:inline-flex;gap:12px;margin-top:11px">
+                <span class="chip">移动网络</span>
+                <span class="chip ok">质量 优</span>
+              </span>
+            </span>
+          </p>
+          <div class="heroinfo">
+            <div><small>运行时长</small><b>—</b></div>
+            <div><small>组织</small><b>China Mobile</b></div>
+          </div>
         </div>
-        <canvas id="flower" width="101" height="101"></canvas>
+        <div class="playwrap"><div class="play"><span>▶</span></div></div>
       </section>
 
-      <!-- 双列 KPI 卡 -->
+      <!-- 双列 KPI 卡：固定对② + ④（数字+单位基线对齐）+ 底部留白 -->
       <section class="card kpi">
-        <div class="row1"><span>◧ 卡头 16px</span><span>峰值 xx</span></div>
-        <p class="num">42px</p>
-        <div style="min-height:60px">图表区（吃满余高）</div>
+        <div class="cardhead"><span>↑</span>上传<span class="meta">峰值 0 B/s</span></div>
+        <p style="margin:14px 0 0"><span class="num">0</span> <span class="unit">B/s</span></p>
+        <p class="sub">累计 0 B</p>
       </section>
       <section class="card kpi">
-        <div class="row1"><span>◷ 卡头 16px</span><span>峰值 xx</span></div>
-        <p class="num">42px</p>
-        <div style="min-height:60px">图表区</div>
+        <div class="cardhead"><span style="color:var(--accent)">↓</span>下载<span class="meta">峰值 0 B/s</span></div>
+        <p style="margin:14px 0 0"><span class="num">0</span> <span class="unit">B/s</span></p>
+        <p class="sub">累计 0 B</p>
       </section>
 
-      <!-- 通栏分段器 -->
-      <section class="card span seg">
-        <button class="on">规则</button><button>全局</button><button>直连</button>
+      <!-- 分段器：图标+标题 + 整体连续轨道三等分（段间 3px 卡色缝） -->
+      <section class="card span rowcard seg">
+        <span class="label">⋯ 出站模式</span>
+        <span class="track">
+          <button class="on">规则</button><button>全局</button><button>直连</button>
+        </span>
       </section>
 
-      <!-- 开关行 -->
-      <section class="card span switchrow">
-        <span class="ic">⚡</span>
-        <span class="tt"><b>16px 主文字</b><small>14px 副文字</small></span>
+      <!-- 开关行 ×2：开启态=蓝正圆容器，关闭态=裸图标 -->
+      <section class="card rowcard switchrow">
+        <span class="ic">⇄</span>
+        <span class="tt"><b>系统代理</b><small>端口 7890</small></span>
         <span class="sw on" onclick="this.classList.toggle('on')"></span>
+      </section>
+      <section class="card rowcard switchrow">
+        <span class="ic off">▣</span>
+        <span class="tt"><b>虚拟网卡</b><small>已关闭</small></span>
+        <span class="sw" onclick="this.classList.toggle('on')"></span>
+      </section>
+
+      <!-- 底部 2×2：嵌套井卡 + 空态卡 -->
+      <section class="card">
+        <div class="cardhead">▢ 内网 IP<span class="meta" style="font-size:14px">⧉</span></div>
+        <p class="num" style="font-size:28px;line-height:34px;margin:10px 0 12px">192.168.8.8</p>
+        <div style="background:var(--surface2);border-radius:14px;padding:10px 16px;
+                    display:flex;align-items:center;gap:14px">
+          <span style="width:28px;height:28px;border-radius:50%;background:var(--well);
+                       display:grid;place-items:center;font-size:13px">≋</span>
+          <span style="flex:1;font-size:15px">局域网代理</span>
+          <span class="sw" onclick="this.classList.toggle('on')"></span>
+        </div>
+      </section>
+      <section class="card">
+        <div class="cardhead">◧ 配置<span class="meta">›</span></div>
+        <div style="margin-top:10px;font-size:28px;font-weight:600">添加配置</div>
+      </section>
+      <section class="card">
+        <div class="cardhead">◷ 服务状态<span class="meta">1 项异常</span></div>
+        <p style="margin:12px 0 0;font-size:13px;color:var(--fg2)">内核运行中</p>
+      </section>
+      <section class="card">
+        <div class="cardhead">◈ 内存信息<span class="meta">128 MB</span></div>
+        <p style="margin:12px 0 0;font-size:13px;color:var(--fg2)">堆占用 64 MB</p>
       </section>
 
     </div>
   </main>
+  </div>
 </div>
 
 <script>
+/* 主题切换：?theme=dark|light（默认浅色）；主题切换 = 全窗颜色 lerp，B7 */
+if (new URLSearchParams(location.search).get("theme") === "dark")
+  document.documentElement.dataset.theme = "dark";
+
 /* 花形 scalloped seal（B6）：n 瓣外鼓，弦长 2R·sin(π/n) ≤ 2r 即有效。
-   大钮 10~12 瓣；<30px 小徽章用 5~6 瓣或退回圆形。 */
+   徽章/装饰用 10~12 瓣；<30px 小徽章用 5~6 瓣或退回圆形。装饰永远=次级表面灰。 */
 function flowerPath(cx, cy, R, r, n) {
   let p = "";
   for (let i = 0; i < n; i++) {
@@ -135,12 +240,19 @@ function flowerPath(cx, cy, R, r, n) {
   }
   return p + "Z";
 }
-const c = document.getElementById("flower").getContext("2d");
-c.translate(50.5, 50.5);
-c.fillStyle = "#1B6FD8";
-c.fill(new Path2D(flowerPath(0, 0, 48, 2 * 48 * Math.sin(Math.PI / 11) * 0.62, 11)));
-c.fillStyle = "#fff"; c.font = "13px system-ui"; c.textAlign = "center";
-c.fillText("▶", 0, 5);
+function drawFlower(ctx, cx, cy, R, n, fill) {
+  ctx.fillStyle = fill;
+  ctx.fill(new Path2D(flowerPath(cx, cy, R, 2 * R * Math.sin(Math.PI / n) * 0.66, n)));
+}
+const css = getComputedStyle(document.body);
+const cSurface = css.getPropertyValue("--surface2").trim() || "#EFEDEF";
+const cFg2 = css.getPropertyValue("--fg2").trim() || "#414755";
+const cb = document.getElementById("cnbadge").getContext("2d");
+drawFlower(cb, 24, 23, 22, 10, cSurface);
+cb.fillStyle = cFg2; cb.font = "600 12px system-ui"; cb.textAlign = "center";
+cb.fillText("CN", 24, 27);
+const bb = document.getElementById("blob").getContext("2d");
+drawFlower(bb, 150, 150, 148, 11, cSurface);
 </script>
 </body>
 </html>
